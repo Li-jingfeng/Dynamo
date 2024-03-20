@@ -46,7 +46,7 @@ class BaseDataset(data.Dataset):
         self.img_type = img_type
 
         self.num_scales = num_scales
-        self.interp = Image.ANTIALIAS
+        # self.interp = Image.ANTIALIAS
         self.frame_idxs = frame_idxs
 
         self.is_train = is_train
@@ -127,7 +127,8 @@ class BaseDataset(data.Dataset):
         line = self.filenames[index].split()
         folder = line[0]
 
-        frame_index = int(line[1])  #hacky might give error for kitti but not sure why rn
+        # frame_index = int(line[1])  #hacky might give error for kitti but not sure why rn
+        frame_index = int(line[1].split('_')[0]) # for notr dataset
 
         if len(line) == 3:
             side = line[2]
@@ -200,7 +201,7 @@ class BaseDataset(data.Dataset):
             inputs['paths'] = line
         
         inputs['index'] = index
-            
+        inputs['frame_index'] = frame_index
         return inputs
     
     def get_img_path(self, folder, frame_index, side):

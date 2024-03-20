@@ -55,7 +55,7 @@ class Trainer:
         
         ## Setup Dataset
 
-        datasets_dict = {'kitti': datasets.KITTIDataset, 'waymo': datasets.WaymoDataset, 'nuscenes': datasets.nuScenesDataset}
+        datasets_dict = {'kitti': datasets.KITTIDataset, 'waymo': datasets.WaymoDataset, 'nuscenes': datasets.nuScenesDataset, 'notr': datasets.NOTRDataset}
         self.dataset = datasets_dict[self.opt.dataset]
 
         # Setup Metrics / Auxillary Tools
@@ -67,7 +67,7 @@ class Trainer:
         self.I = torch.eye(4).reshape(1,4,4).repeat(self.B,1,1).to(self.device)
         
         # Setup Scale-Dependent Tools
-
+ 
         self.resize = {}
         self.backproject_depth = {}
         self.project_3d = {}
@@ -178,10 +178,10 @@ class Trainer:
 
         self.set_eval()
         try:
-            inputs = self.val_iter.next()
+            inputs = self.val_iter.__next__()
         except StopIteration:
             self.val_iter = iter(self.val_loader)
-            inputs = self.val_iter.next()
+            inputs = self.val_iter.__next__()
 
         with torch.no_grad():
             outputs, losses = self.process_batch(inputs)

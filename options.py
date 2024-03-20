@@ -45,7 +45,7 @@ class DynamoOptions:
 		self.p.add_argument("--dataset", "-d",
 							type=str,
 							help="dataset to train on",
-							choices=["kitti", "waymo", "nuscenes"],
+							choices=["kitti", "waymo", "nuscenes", "notr"],
 							default="waymo")
 		self.p.add_argument("--data_path",
 							type=str,
@@ -155,7 +155,7 @@ class DynamoOptions:
 							type=str,
 							help="depth model to use",
 							choices=["monodepthv2", "litemono"],
-							default="litemono")
+							default="monodepthv2")
 		self.p.add_argument("--encoder_num_layers",
 							type=int,
 							help="number of resnet layers",
@@ -272,17 +272,18 @@ class DynamoOptions:
 
 		# defines dataset-dependent configs - if they are set via arguments, then the following will be ignored 
 		dataset_conf = {
-			'split': 			{"waymo": "waymo", "nuscenes": "nuscenes", "kitti": "eigen_zhou"},		# train/test split name
-			'height': 			{"waymo": 320, "nuscenes": 288, "kitti": 192},							# height used for training
-			'width': 			{"waymo": 480, "nuscenes": 512, "kitti": 640},							# width used for training
-			'cam_name': 		{"waymo": 'FRONT', "nuscenes": 'FRONT', "kitti": 'image_02'},			# only used for eval in kitti 
-			'train_img_type': 	{"waymo": 'downsample', "nuscenes": 'downsample', "kitti": 'downsample'},#image type used for training
-			'eval_max_depth': 	{"waymo": 75, "nuscenes": 75, "kitti": 80},								# max depth bound used for evaluation
-			'eval_img_bound': 	{"waymo": 	  [0, 1, 0, 1], 											# image bound used for evaluation 
+			'split': 			{"notr": "notr", "waymo": "waymo", "nuscenes": "nuscenes", "kitti": "eigen_zhou"},		# train/test split name
+			'height': 			{"notr": 1280, "waymo": 320, "nuscenes": 288, "kitti": 192},							# height used for training
+			'width': 			{"notr": 1920, "waymo": 480, "nuscenes": 512, "kitti": 640},							# width used for training
+			'cam_name': 		{"notr": 'FRONT', "waymo": 'FRONT', "nuscenes": 'FRONT', "kitti": 'image_02'},			# only used for eval in kitti 
+			'train_img_type': 	{"notr": 'downsample', "waymo": 'downsample', "nuscenes": 'downsample', "kitti": 'downsample'},#image type used for training
+			'eval_max_depth': 	{"notr": 75, "waymo": 75, "nuscenes": 75, "kitti": 80},								# max depth bound used for evaluation
+			'eval_img_bound': 	{"notr": [0, 1, 0, 1], 											
+								 "waymo": 	  [0, 1, 0, 1], 											# image bound used for evaluation 
 								 "nuscenes":  [0, 1, 0, 1], 
 								 "kitti": 	  [0.40810811, 0.99189189, 0.03594771,  0.96405229]},		# https://github.com/nianticlabs/monodepth2/blob/b676244e5a1ca55564eb5d16ab521a48f823af31/evaluate_depth.py#L193
-			'eval_img_ext': 	{"waymo": '.jpg', "nuscenes": '.jpg', "kitti": '.png'},					
-			'eval_img_type': 	{"waymo": 'downsample', "nuscenes": 'downsample', "kitti": 'original'},	
+			'eval_img_ext': 	{"notr": '.jpg', "waymo": '.jpg', "nuscenes": '.jpg', "kitti": '.png'},					
+			'eval_img_type': 	{"notr": 'downsample', "waymo": 'downsample', "nuscenes": 'downsample', "kitti": 'original'},	
 		}
 		
 		if self.opt.scales is None:

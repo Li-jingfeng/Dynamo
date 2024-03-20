@@ -52,8 +52,17 @@ def get_filenames(segment_name, opt):
     """ Return the list of filenames given a segment path
     """
     cam_name, img_type, img_ext = opt.cam_name, opt.eval_img_type, opt.eval_img_ext
-    rgb_dir_path = osp.join(opt.data_path, segment_name, cam_name, 'rgb', img_type)
-    frame_indices = sorted([int(osp.splitext(f)[0]) for f in os.listdir(rgb_dir_path) if osp.splitext(f)[1] == img_ext])
+    # rgb_dir_path = osp.join(opt.data_path, segment_name, cam_name, 'rgb', img_type)
+    rgb_dir_path = osp.join(opt.data_path, segment_name, 'images')
+    if opt.dataset == 'kitti':
+        rgb_dir_path = osp.join(opt.data_path, segment_name, 'image_2')
+        frame_indices = sorted([int(osp.splitext(f)[0]) for f in os.listdir(rgb_dir_path) if osp.splitext(f)[1] == img_ext])
+        return [f'{segment_name} {i}' for i in frame_indices]
+    if opt.dataset == 'notr': # 只要第一个相机的
+        frame_indices = sorted([f.split('_')[0] for f in os.listdir(rgb_dir_path) if f.split('_')[1] == '0'+img_ext])
+        return [f'{segment_name} {i}_0' for i in frame_indices]
+    else:
+        frame_indices = sorted([int(osp.splitext(f)[0]) for f in os.listdir(rgb_dir_path) if osp.splitext(f)[1] == img_ext])
     return [f'{segment_name} {i}' for i in frame_indices]
 
 def is_edge(filename, opt):
@@ -61,10 +70,21 @@ def is_edge(filename, opt):
         Only used during evaluation
     """
     cam_name, img_type, img_ext = opt.cam_name, opt.eval_img_type, opt.eval_img_ext
-    seg_name, frame_index = filename.split()[0], int(filename.split()[1])
-    left_index, right_index = frame_index + np.min(opt.frame_ids), frame_index + np.max(opt.frame_ids)
-    left_bound = osp.join(opt.data_path, seg_name, cam_name, 'rgb', img_type, f'{left_index:06}{img_ext}')
-    right_bound = osp.join(opt.data_path, seg_name, cam_name, 'rgb', img_type, f'{right_index:06}{img_ext}')
+    if opt.dataset=='NOTR':
+        seg_name, frame_index = filename.split()[0], int(filename.split()[1].split('_')[0])
+        left_index, right_index = frame_index + np.min(opt.frame_ids), frame_index + np.max(opt.frame_ids)
+        left_bound = osp.join(opt.data_path, seg_name, 'images', f'{left_index:03}_0{img_ext}')
+        right_bound = osp.join(opt.data_path, seg_name, 'images', f'{right_index:03}_0{img_ext}')
+    elif opt.dataset=="kitti":
+        seg_name, frame_index = filename.split()[0], int(filename.split()[1].split('_')[0])
+        left_index, right_index = frame_index + np.min(opt.frame_ids), frame_index + np.max(opt.frame_ids)
+        left_bound = osp.join(opt.data_path, seg_name, 'image_2', f'{left_index:06}{img_ext}')
+        right_bound = osp.join(opt.data_path, seg_name, 'image_2', f'{right_index:06}{img_ext}')
+    else:
+        seg_name, frame_index = filename.split()[0], int(filename.split()[1])
+        left_index, right_index = frame_index + np.min(opt.frame_ids), frame_index + np.max(opt.frame_ids)
+        left_bound = osp.join(opt.data_path, seg_name, cam_name, 'rgb', img_type, f'{left_index:06}{img_ext}')
+        right_bound = osp.join(opt.data_path, seg_name, cam_name, 'rgb', img_type, f'{right_index:06}{img_ext}')
     return (not osp.exists(left_bound)) or (not osp.exists(right_bound))
 
 def join_dir(*tree):
